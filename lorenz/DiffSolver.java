@@ -6,9 +6,9 @@
  *     abstrakte Methode 'df', deren konkrete Implementation das Diff.gl-
  *     System implementieren muss. Die Methode 'next' fuehrt einen Schritt
  *     der Integration durch. Fuer die Integration wird das Runge-Kutta-
- *     Verfahren 4. Ordnung verwendet. 
+ *     Verfahren 4. Ordnung verwendet.
  */
- 
+
 public abstract class DiffSolver {
 
     public abstract Point3d df (Point3d x);

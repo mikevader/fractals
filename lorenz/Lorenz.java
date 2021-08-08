@@ -92,7 +92,7 @@ public class Lorenz
     final double xMax    =  40.0;
     final double yMin    = -20.0;
     final double yMax    =  40.0;
-    final int    nPath   =     2;
+    final int    nPath   =     3;
     final int    nPoints =  5000;
     final double dx      = 0.003;
     final double phi     = Math.PI / 48.0;
@@ -102,17 +102,19 @@ public class Lorenz
 
     BufferedImage offImage;
     Graphics2D offGraph;
-    Graph3d  g3d;
-    Vector[] path;
+    Graph3d   g3d;
+    Vector    points;
+    Point3d[] currentPoints;
 
     int      lastX, lastY;
 
     public void nextPoint () {
-        for (int i=0; i<path.length; i++) {
-            path[i].addElement (lAttr.next ((Point3d) path[i].lastElement (), dx));
-            if (path[i].size () == nPoints) {
-                path[i].removeElementAt (0);
+        for (int i=0; i<nPath; i++) {
+            if (points.size () == nPath * nPoints) {
+                points.removeElementAt (0);
             }
+            points.addElement (currentPoints[i]);
+            currentPoints[i] = lAttr.next (currentPoints[i], dx);
         }
     }
 
@@ -138,16 +140,18 @@ public class Lorenz
 
         g3d  = new Graph3d (getWidth (), getHeight ());
         g3d.setDisplayRange (xMin, xMax, yMin, yMax);
-
-        lAttr = new LorenzAttraktor ();
-        path  = new Vector[nPath];
-        for (int i=0; i<path.length; i++) {
-            path[i] = new Vector (nPoints);
-        }
-        path[0].addElement (new Point3d (0.000, 5.0, 5.0, 0));
         g3d.initColorMap (0, Color.red);
-        path[1].addElement (new Point3d (0.001, 5.0, 5.0, 1));
         g3d.initColorMap (1, Color.green);
+        g3d.initColorMap (2, Color.blue);
+        
+        lAttr  = new LorenzAttraktor ();
+        currentPoints = new Point3d[nPath];
+        
+        currentPoints[0] = new Point3d ( 0.0,  5.0,  5.0, 0);
+        currentPoints[1] = new Point3d ( 0.0,  4.0,  5.0, 1);
+        currentPoints[2] = new Point3d ( 0.0,  3.0,  5.0, 2);
+        
+        points = new Vector (nPath * nPoints);
     }
 
     public void start () {
@@ -165,10 +169,7 @@ public class Lorenz
 
     public void paint (Graphics g) {
         offGraph.clearRect (0, 0, getWidth (), getHeight ());
-        g3d.setPath (offGraph, path);
-        //for (int i=0; i<path.length; i++) {
-        //    g3d.setPath (offGraph, path[i]);
-        //}
+        g3d.setPoints (offGraph, points);
         g.drawImage (offImage, 0, 0, null);
     }
 

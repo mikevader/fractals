@@ -18,20 +18,8 @@ import java.util.*;
 
 public class Graph3d {
     
-    public static class CompareZ implements Comparator {
-        public int compare (Object o1, Object o2) {
-            if (((Point3d) o1).z < ((Point3d) o2).z) {
-                return -1;
-            }
-            if (((Point3d) o1).z > ((Point3d) o2).z) {
-                return +1;
-            }
-            return 0;
-        }
-    }
-    
-    private final int    nColors = 256;
-    private final double darkFactor = 0.9;
+    private final int    nColors    = 256;
+    private final double darkFactor = 0.7;
 
     private int       width, height;
     private double    xMin, xMax, yMin, yMax, zMin, zMax;
@@ -40,9 +28,7 @@ public class Graph3d {
     private double    R00, R01, R02;
     private double    R10, R11, R12;
     private double    R20, R21, R22;
-    private CompareZ  cmpZ;
-    private Vector    colorMaps;
-
+    private Color[][] colorMaps;
 
     public Graph3d (int width, int height) {
         this.width  = width;
@@ -51,8 +37,6 @@ public class Graph3d {
         R01 = R02 = 0.0;
         R10 = R12 = 0.0;
         R20 = R21 = 0.0;
-        cmpZ        = new CompareZ ();
-        colorMaps   = new Vector ();
     }
     
     public void setWindowSize (int width, int height) {
@@ -75,21 +59,23 @@ public class Graph3d {
     }
 
     public void initColorMap (int mapIndex, Color c) {
-        Color[] colorMap = new Color[nColors];
+        Color[][] tmp = colorMaps;
+        colorMaps = new Color[mapIndex + 1][];
+        if (tmp != null) {
+            for (int i=0; i<tmp.length; i++) {
+                colorMaps[i] = tmp[i];
+            }
+        }
+        colorMaps[mapIndex] = new Color[nColors];
         double redValue   = c.getRed ();
         double greenValue = c.getGreen ();
         double blueValue  = c.getBlue ();
         for (int i=0; i<nColors; i++) {
             double f = (double) i / (double) (nColors - 1);
-            int red   = (int) colorFunc_01 (i, redValue);
-            int green = (int) colorFunc_01 (i, greenValue);
-            int blue  = (int) colorFunc_01 (i, blueValue);
-            colorMap[i] = new Color (red, green, blue);
-        }
-        if (colorMaps.size () <= mapIndex) {
-            colorMaps.addElement (colorMap);
-        } else {
-            colorMaps.setElementAt (colorMap, mapIndex);
+            int red   = (int) colorFunc_02 (i, redValue);
+            int green = (int) colorFunc_02 (i, greenValue);
+            int blue  = (int) colorFunc_02 (i, blueValue);
+            colorMaps[mapIndex][i] = new Color (red, green, blue);
         }
     }
     
@@ -168,46 +154,24 @@ public class Graph3d {
         rotateZ ((double) nPix * phiY);
     }
 
-    public void setPoint (Graphics g, Point3d p) {
-        Point3d q = transform (p);
-        g.fillRect (toCol (q.x), toLine (q.y), 1, 1);
-    }
-    
-    public void setPath (Graphics g, Vector[] path) {
-        int nPoints    = 0;
-        int pointIndex = 0;
-        Vector[]  p = new Vector[path.length];
-        Point3d[] q;
+    public void setPoints (Graphics g, Vector points) {
+        Vector    p = (Vector) points.clone ();
+        Point3d[] q = new Point3d[p.size ()];
         
-        for (int i=0; i<path.length; i++) {
-            p[i] = (Vector) path[i].clone ();
-            nPoints += p[i].size ();
+        for (int i=0; i<p.size (); i++) {
+            q[i] = transform ((Point3d) p.elementAt (i));
         }
-        q = new Point3d[nPoints];
-        for (int i=0; i<p.length; i++) {
-            Vector temp = p[i];
-            for (int j=0; j<temp.size (); j++) {
-                q[pointIndex++] = transform ((Point3d) temp.elementAt (j));
-            }
-        }
-        Arrays.sort (q, cmpZ);
+        Arrays.sort (q);
         zMin = q[0].z;
         zMax = q[q.length-1].z;
         pixZ = (double) (nColors - 1) / (zMax - zMin);
-        for (int i=0; i<nPoints; i++) {
-            Color[] colorMap = (Color[]) colorMaps.elementAt (q[i].mapIndex);
-            g.setColor (colorMap[toColorIndex (q[i].z)]);
+        for (int i=0; i<q.length; i++) {
+            int colorMap = q[i].mapIndex;
+            g.setColor (colorMaps[colorMap][toColorIndex (q[i].z)]);
             g.fillRect (toCol (q[i].x), toLine (q[i].y), 1, 1);
         }
     }
 
-    public void setLine (Graphics g, Point3d p1, Point3d p2) {
-        Point3d q1 = transform (p1);
-        Point3d q2 = transform (p2);
-        g.drawLine (toCol (q1.x), toLine (q1.y),
-                toCol (q2.x), toLine (q2.y));
-    }
-    
     private Point3d transform (Point3d p) {
         Point3d q = new Point3d ();
         q.x = R00 * p.x + R01 * p.y + R02 * p.z;

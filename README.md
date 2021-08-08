@@ -4,5 +4,6 @@ Small Java Applications to draw and produce wonderful fractal graphics
 
 
 ## Lorenz Attractor
-[./lorenz]
+[Lorenz](./lorenz/index.html)
+
 

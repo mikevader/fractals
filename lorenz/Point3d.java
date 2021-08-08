@@ -6,7 +6,8 @@
  *
  */
 
-public class Point3d {
+public class Point3d
+        implements Comparable {
 
     public double x, y, z;
     public int    mapIndex;
@@ -29,5 +30,13 @@ public class Point3d {
 
     public static Point3d multiply (double a, Point3d b) {
         return new Point3d (a * b.x, a * b.y, a * b.z, b.mapIndex);
+    }
+    
+    public int compareTo (Object p) {
+        if (z < ((Point3d)p).z)
+            return -1;
+        if (z > ((Point3d)p).z)
+            return +1;
+        return 0;
     }
 }
