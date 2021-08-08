@@ -11,9 +11,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
 import java.util.*;
+import javax.swing.*;
 
-public class Lorenz
-        extends Applet
+public class Lorenz extends Applet
         implements KeyListener, MouseListener, MouseMotionListener,
             ComponentListener, ActionListener {
 
@@ -113,8 +113,8 @@ public class Lorenz
             if (points.size () == nPath * nPoints) {
                 points.removeElementAt (0);
             }
-            points.addElement (currentPoints[i]);
             currentPoints[i] = lAttr.next (currentPoints[i], dx);
+            points.addElement (currentPoints[i]);
         }
     }
 
@@ -125,18 +125,9 @@ public class Lorenz
         setBackground (Color.black);
         setForeground (Color.white);
         
-        // Button button = new Button ("Anhalten");
-        // add (button);
-        // button.addActionListener (this);
-        
         Dimension dim = getSize ();
         offImage = (BufferedImage) createImage (dim.width, dim.height);
         offGraph = offImage.createGraphics ();
-
-        addKeyListener (this);
-        addMouseListener (this);
-        addMouseMotionListener (this);
-        addComponentListener (this);
 
         g3d  = new Graph3d (getWidth (), getHeight ());
         g3d.setDisplayRange (xMin, xMax, yMin, yMax);
@@ -145,13 +136,20 @@ public class Lorenz
         g3d.initColorMap (2, Color.blue);
         
         lAttr  = new LorenzAttraktor ();
-        currentPoints = new Point3d[nPath];
         
+        points = new Vector (nPath * nPoints);
+        currentPoints = new Point3d[nPath];
         currentPoints[0] = new Point3d ( 0.0,  5.0,  5.0, 0);
         currentPoints[1] = new Point3d ( 0.0,  4.0,  5.0, 1);
         currentPoints[2] = new Point3d ( 0.0,  3.0,  5.0, 2);
+        for (int i=0; i<nPath; i++) {
+            points.addElement (currentPoints[i]);
+        }
         
-        points = new Vector (nPath * nPoints);
+        addKeyListener (this);
+        addMouseListener (this);
+        addMouseMotionListener (this);
+        addComponentListener (this);
     }
 
     public void start () {
