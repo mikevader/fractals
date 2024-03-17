@@ -4,7 +4,9 @@
 
 pipeline {
   agent {
-    label 'maven'
+    kubernetes {
+      inheritFrom 'maven'
+    }
   }
 
 
