@@ -13,7 +13,9 @@ pipeline {
   stages {
     stage('build') {
       steps {
-        sh 'mvn clean install'
+        container('maven') {
+          sh 'mvn clean install'
+        }
       }
     }
   }
