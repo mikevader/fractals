@@ -1,0 +1,9 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+ 
+  <groupId>ch.anduin</groupId>
+  <artifactId>fractals</artifactId>
+  <version>1</version>
+
+  <packaging>pom</packaging>
+</project>
